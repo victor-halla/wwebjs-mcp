@@ -136,4 +136,4 @@ sessions without explicit operator approval.
   *that* container — use the shared Docker network service name or
   `http://host.docker.internal:8080/mcp`, not `localhost`.
 - The full usage guide for the WhatsApp tools lives in
-  `.claude/skills/whatsapp-mcp/SKILL.md` in this repo.
+  `.claude/skills/wwebjs-mcp/SKILL.md` in this repo.

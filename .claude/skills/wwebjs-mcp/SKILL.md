@@ -1,5 +1,5 @@
 ---
-name: whatsapp-mcp
+name: wwebjs-mcp
 description: Use the wwebjs-mcp server to drive WhatsApp via the wwebjs-api. Covers connecting a session (QR/pairing), sending text/media/location/poll messages, managing chats, groups, contacts, labels, and reacting/replying to messages. Trigger when the user wants to send WhatsApp messages, manage a WhatsApp session, or otherwise use the whatsapp / wwebjs MCP tools.
 ---
 

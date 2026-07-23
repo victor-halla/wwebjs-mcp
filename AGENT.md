@@ -70,7 +70,7 @@ names).
 | `.env.example` | Documented template for `.env`. |
 | `README.md` | Human setup: connect to existing wwebjs-api (Scenario A) or from scratch (Scenario B); client config. |
 | `SETUP-OPENCLAW.md` | Runbook an OpenClaw/Hermes agent executes to self-configure the connection. |
-| `.claude/skills/whatsapp-mcp/SKILL.md` | Task-oriented usage guide for the WhatsApp tools (for the client agent, not for building). |
+| `.claude/skills/wwebjs-mcp/SKILL.md` | Task-oriented usage guide for the WhatsApp tools (for the client agent, not for building). |
 
 ---
 

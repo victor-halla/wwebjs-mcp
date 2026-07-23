@@ -220,7 +220,7 @@ Most clients follow the same shape as Claude Code above (`mcpServers` map with
 - If the AI tool runs in its own container, use a URL it can reach the MCP
   container by (shared Docker network name, or `host.docker.internal:8080`).
 - Tell the agent which **session id** to operate on; it passes `sessionId` on
-  every tool call. See the `whatsapp-mcp` skill for the usage playbook.
+  every tool call. See the `wwebjs-mcp` skill for the usage playbook.
 
 **stdio transport** (local process instead of HTTP) — set `MCP_TRANSPORT=stdio`
 and have the client launch `node dist/index.js` with the same env vars.
@@ -228,7 +228,7 @@ and have the client launch `node dist/index.js` with the same env vars.
 ## Using the included Claude Code skill
 
 This repo ships a Claude Code skill at
-[`.claude/skills/whatsapp-mcp/SKILL.md`](.claude/skills/whatsapp-mcp/SKILL.md).
+[`.claude/skills/wwebjs-mcp/SKILL.md`](.claude/skills/wwebjs-mcp/SKILL.md).
 It's a task-oriented playbook for the *agent using the tools* (not for
 building this server): connecting a session (QR/pairing code), sending
 text/media/location/poll messages, resolving `chatId`/`messageId` correctly,
@@ -242,18 +242,18 @@ server). Copy the skill folder wherever you need it:
 ```bash
 # Available only in one project:
 mkdir -p /path/to/your-project/.claude/skills
-cp -r .claude/skills/whatsapp-mcp /path/to/your-project/.claude/skills/
+cp -r .claude/skills/wwebjs-mcp /path/to/your-project/.claude/skills/
 
 # Or available to Claude Code in every project on this machine:
 mkdir -p ~/.claude/skills
-cp -r .claude/skills/whatsapp-mcp ~/.claude/skills/
+cp -r .claude/skills/wwebjs-mcp ~/.claude/skills/
 ```
 
 Once the skill is in place and the MCP server is connected (previous
 section), Claude Code loads it automatically — no manual setup beyond
 copying the folder. It triggers on its own whenever you ask for something
 WhatsApp-related ("send a WhatsApp message to...", "list my WhatsApp
-chats..."), or you can invoke it explicitly with `/whatsapp-mcp`.
+chats..."), or you can invoke it explicitly with `/wwebjs-mcp`.
 
 ## Exposing over HTTPS (Cloudflare Tunnel)
 
