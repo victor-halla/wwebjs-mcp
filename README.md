@@ -21,6 +21,32 @@ MCP client  ──MCP (stdio | HTTP/SSE)──▶  wwebjs-mcp  ──REST (x-api
 - Binary responses (QR image, page screenshot) are returned as MCP image
   content.
 
+## Prerequisites
+
+- **Docker Engine** and **Docker Compose v2** (`docker compose version` should
+  print something; if you only have the old `docker-compose` binary, upgrade
+  Docker Desktop/Engine).
+- Either an existing **wwebjs-api** instance you can reach (→ Scenario A), or
+  none at all — this repo can run one for you too (→ Scenario B).
+
+## Get the code
+
+```bash
+git clone https://github.com/victor-halla/wwebjs-mcp.git
+cd wwebjs-mcp
+```
+
+(SSH clone: `git clone git@github.com:victor-halla/wwebjs-mcp.git`, if you
+have a deploy key or your own key registered on GitHub.)
+
+Then continue with whichever scenario matches your setup below. Both end with
+the same two commands:
+
+```bash
+docker compose up --build -d      # builds the image and starts the container(s)
+curl http://localhost:8080/health # -> {"status":"ok"} once it's up
+```
+
 ## Scenario A — connect to an existing wwebjs-api container
 
 Use this when you **already run wwebjs-api**, with its `API_KEY` set and a
@@ -199,6 +225,36 @@ Most clients follow the same shape as Claude Code above (`mcpServers` map with
 **stdio transport** (local process instead of HTTP) — set `MCP_TRANSPORT=stdio`
 and have the client launch `node dist/index.js` with the same env vars.
 
+## Using the included Claude Code skill
+
+This repo ships a Claude Code skill at
+[`.claude/skills/whatsapp-mcp/SKILL.md`](.claude/skills/whatsapp-mcp/SKILL.md).
+It's a task-oriented playbook for the *agent using the tools* (not for
+building this server): connecting a session (QR/pairing code), sending
+text/media/location/poll messages, resolving `chatId`/`messageId` correctly,
+managing chats/groups/contacts/labels/channels, and which actions to confirm
+with the user before calling (`session_terminateAll`, `chat_delete`, …).
+
+Skills are project-scoped, and you'll normally be using the WhatsApp tools
+from a *different* project than this one (this repo's job is just to run the
+server). Copy the skill folder wherever you need it:
+
+```bash
+# Available only in one project:
+mkdir -p /path/to/your-project/.claude/skills
+cp -r .claude/skills/whatsapp-mcp /path/to/your-project/.claude/skills/
+
+# Or available to Claude Code in every project on this machine:
+mkdir -p ~/.claude/skills
+cp -r .claude/skills/whatsapp-mcp ~/.claude/skills/
+```
+
+Once the skill is in place and the MCP server is connected (previous
+section), Claude Code loads it automatically — no manual setup beyond
+copying the folder. It triggers on its own whenever you ask for something
+WhatsApp-related ("send a WhatsApp message to...", "list my WhatsApp
+chats..."), or you can invoke it explicitly with `/whatsapp-mcp`.
+
 ## Exposing over HTTPS (Cloudflare Tunnel)
 
 To reach this server from outside your network (e.g. a hosted AI client that
@@ -271,6 +327,3 @@ Tools are named `<segments>` joined by `_`, dropping path params:
 
 When two methods share a path (e.g. `GET`/`POST /client/getChats`), the second
 is prefixed with its method (`post_client_getChats`).
-
-See the companion Claude Code skill (`.claude/skills/whatsapp-mcp`) for a
-task-oriented usage guide.
