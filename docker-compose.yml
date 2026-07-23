@@ -1,0 +1,41 @@
+# MCP server only (connects to a wwebjs-api you already run).
+# If you also want to run wwebjs-api here, uncomment the second service.
+services:
+  wwebjs-mcp:
+    build: .
+    image: wwebjs-mcp:latest
+    container_name: wwebjs-mcp
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "${MCP_HTTP_PORT:-8080}:8080"
+    extra_hosts:
+      # lets WWEBJS_API_URL=http://host.docker.internal:3000 reach the host
+      - "host.docker.internal:host-gateway"
+
+  # --- Optional: run wwebjs-api alongside (then set ---------------------
+  # --- WWEBJS_API_URL=http://wwebjs-api:3000 in .env) -------------------
+  # wwebjs-api:
+  #   image: avoylenko/wwebjs-api:latest
+  #   container_name: wwebjs-api
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - API_KEY=${WWEBJS_API_KEY}
+  #     - BASE_WEBHOOK_URL=http://localhost:3000/localCallbackExample
+  #     - ENABLE_LOCAL_CALLBACK_EXAMPLE=TRUE
+  #   volumes:
+  #     - ./sessions:/usr/src/app/sessions
+
+  # --- Optional: expose this MCP server over HTTPS via Cloudflare Tunnel -
+  # --- Create the tunnel in the Cloudflare Zero Trust dashboard, set its --
+  # --- public hostname to point at service http://wwebjs-mcp:8080, then --
+  # --- set CLOUDFLARE_TUNNEL_TOKEN in .env and uncomment this service. ---
+  # cloudflared:
+  #   image: cloudflare/cloudflared:latest
+  #   container_name: wwebjs-mcp-tunnel
+  #   restart: unless-stopped
+  #   command: tunnel run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+  #   depends_on:
+  #     - wwebjs-mcp
