@@ -3360,7 +3360,14 @@
                     "description": "The type of message content, must be one of the following: string, MessageMedia, MessageMediaFromURL, Location, Contact or Poll"
                   },
                   "content": {
-                    "type": "object",
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "object"
+                      }
+                    ],
                     "description": "The content of the message, can be a string or an object"
                   },
                   "options": {
@@ -11317,7 +11324,14 @@
                     "description": "The type of message content, must be one of the following: string, MessageMedia, MessageMediaFromURL, Location, Contact or Poll"
                   },
                   "content": {
-                    "type": "object",
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "object"
+                      }
+                    ],
                     "description": "The content of the message, can be a string or an object"
                   },
                   "options": {
@@ -13355,7 +13369,14 @@
                     "description": "The type of message content, must be one of the following: string, MessageMedia, MessageMediaFromURL"
                   },
                   "content": {
-                    "type": "object",
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "object"
+                      }
+                    ],
                     "description": "The content of the message, can be a string or an object"
                   },
                   "options": {

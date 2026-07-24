@@ -60,13 +60,38 @@ cannot complete that step for them.
 `client_sendMessage(sessionId, chatId, contentType, content, options?)`.
 `contentType` selects the shape of `content`:
 
+> **Important — the generated tool schema may still say `content` is an
+> object.** This repo's `swagger.json` has been fixed so `content` allows a
+> string *or* an object for `client_sendMessage`, `message_reply`, and
+> `channel_sendMessage` — but if you're talking to a deployment that hasn't
+> rebuilt from the latest version yet, the schema you see may still claim
+> `content: object` even for plain text. **Follow the runtime shapes below
+> regardless of what the schema says:**
+>
+> - `contentType: "string"` → `content` **must be a plain JSON string**.
+> - `contentType: "MessageMediaFromURL"` → `content` **must be the URL string**.
+> - `contentType: "MessageMedia"` → `content` is an object.
+> - `contentType: "Location"` → `content` is an object.
+> - `contentType: "Contact"` → `content` is an object: `{ "contactId": "..." }`.
+> - `contentType: "Poll"` → `content` is an object.
+>
+> For text messages, **never** do this:
+> ```json
+> { "contentType": "string", "content": { "text": "Hello" } }
+> ```
+> It reaches wwebjs-api but fails with `e.replace is not a function` (and the
+> message is **not** sent). Always do this instead:
+> ```json
+> { "contentType": "string", "content": "Hello" }
+> ```
+
 | contentType | content example |
 |---|---|
 | `string` | `"Hello!"` |
 | `MessageMediaFromURL` | `"https://example.com/img.jpg"` |
 | `MessageMedia` | `{ "mimetype": "image/jpeg", "data": "<base64>", "filename": "img.jpg" }` |
 | `Location` | `{ "latitude": -23.5, "longitude": -46.6, "description": "Office" }` |
-| `Contact` | a contactId string, e.g. `"551199990000@c.us"` |
+| `Contact` | `{ "contactId": "551199990000@c.us" }` |
 | `Poll` | `{ "pollName": "Lunch?", "pollOptions": ["Pizza","Sushi"], "options": { "allowMultipleAnswers": false } }` |
 
 Text example:
@@ -82,6 +107,46 @@ to quote a message by id (same `contentType`/`content` shape, plus
 
 Before sending to a new number, verify it exists:
 `client_isRegisteredUser(sessionId, number)` or `client_getNumberId(sessionId, number)`.
+
+### Safe text-message workflow
+
+1. Check the session is connected: `session_status(sessionId)`.
+2. Resolve the raw phone number: `client_getNumberId(sessionId, number)`.
+3. Use the returned `_serialized` value exactly as `chatId` — it may be an
+   `@c.us` id or an `@lid` id (see "LID identifiers" below). Don't rewrite it
+   yourself.
+4. Call `client_sendMessage` with `contentType: "string"` and `content` as a
+   plain JSON string — never `{ "text": "..." }`.
+5. Verify the result rather than trusting it blindly: if the response has
+   `success: true`, search for the exact message with
+   `client_searchMessages` and confirm `fromMe: true`, the expected
+   recipient, and the message body.
+6. Don't retry on an ambiguous timeout or a generic server error before
+   searching for the message first (see "Retry safety" below) — otherwise
+   the recipient may get a duplicate.
+
+### LID identifiers
+
+`client_getNumberId` may return a `_serialized` id ending in `@lid` instead
+of `@c.us` — this is valid; use the returned value exactly and don't rewrite
+it to `@c.us` yourself.
+
+Some wwebjs-api versions fail `chat_fetchMessages` when given an `@lid`
+`chatId`, even though sending to it works fine. If that happens, don't treat
+it as a delivery failure — verify with `client_searchMessages` using the
+exact message body instead; a global search works across id types.
+
+### Retry safety
+
+- `e.replace is not a function` after a send means the request never reached
+  WhatsApp correctly (an object was passed where text was expected) — the
+  message was **not** sent. Fix `content` to a plain string and retry once.
+- For timeouts, connection resets, or unexplained HTTP 5xx errors, the
+  message may or may not have gone through — **search for it with
+  `client_searchMessages` before retrying**, don't retry blindly.
+- Never report a message as delivered just because the call didn't throw —
+  confirm via `client_searchMessages` or by checking its
+  acknowledgement/status.
 
 ## 3. Full tool catalog
 
